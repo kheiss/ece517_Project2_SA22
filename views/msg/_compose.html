@@ -1,0 +1,137 @@
+{{try:}}
+ {{=H2(title)}}
+{{except:}}
+{{pass}}
+
+<div class='form-container'>
+{{try:}}
+ {{=logform.custom.begin}}
+ <table>
+ <tbody>
+ <tr id='msg_outbox_pr_message_method__row'>
+ <td>
+ <label>{{=outboxform.custom.label.pr_message_method}}: </label>
+ </td>
+ <td>
+ {{=outboxform.custom.widget.pr_message_method}}
+ </td>
+ <td>
+ {{=outboxform.custom.comment.pr_message_method}}
+ </td>
+ </tr>
+ <tr id='msg_outbox_pe_id__row'>
+ <td>
+ <label>{{=outboxform.custom.label.pe_id}}: </label>
+ </td>
+ {{if 'pe_id' in request.vars:}}
+ <script type="text/javascript">//<![CDATA[
+ $('#msg_outbox_pe_id').val({{=request.vars.pe_id}})
+ //]]></script>
+ <td>
+ {{=s3_pentity_represent(request.vars.pe_id)}}
+ </td>
+ {{else:}}
+ <td>
+ {{=INPUT(_id="dummy", _class="ac_input", _size="50")}}
+  {{=outboxform.custom.widget.pe_id}}
+ </td>
+ <td>
+ {{=outboxform.custom.comment.pe_id}}
+ </td>
+ {{pass}}
+ </tr>
+ <tr id='msg_log_subject__row'>
+ <td>
+ <label>{{=logform.custom.label.subject}}: </label>
+ </td>
+ <td>
+ {{=logform.custom.widget.subject}}
+ </td>
+ <td>
+ {{=logform.custom.comment.subject}}
+ </td>
+ </tr>
+ <tr id='msg_log_message__row'>
+ <td>
+ <label>{{=logform.custom.label.message}}: </label>
+ </td>
+ <td>
+ {{=logform.custom.widget.message}}
+ </td>
+ <td>
+ {{=logform.custom.comment.message}}
+ </td>
+ </tr>
+ <!--
+ <tr id='msg_log_priority__row'>
+ <td>
+ <label>{{=logform.custom.label.priority}}: </label>
+ </td>
+ <td>
+ {{=logform.custom.widget.priority}}
+ </td>
+ <td>
+ {{=logform.custom.comment.priority}}
+ </td>
+ -->
+ </tr>
+ <tr id='submit_record__row'>
+ <td>
+ </td>
+ <td>
+  {{=INPUT(_type="submit", _value=T("Send message"), _id="dummy_submit")}}
+ </td>
+ </tr>
+ <td>
+ </td>
+ </tbody>
+ </table>
+ {{=logform.custom.end}}
+{{except:}}
+{{pass}}
+</div>
+<p>&nbsp;</p>
+<script type="text/javascript">//<![CDATA[
+$(function() {
+    if (undefined == $('#msg_outbox_pe_id').val()) {
+        // Recipient is predefined
+    } else {
+        // Hide the real Input Field
+        $('#msg_outbox_pe_id').hide();
+        // Autocomplete-enable the Dummy Input
+        $('#dummy').autocomplete({
+            source: '{{=URL(c='msg',f='search')}}',
+            minLength: 2,
+            focus: function( event, ui ) {
+                $( '#dummy' ).val( ui.item.name );
+                return false;
+            },
+            select: function( event, ui ) {
+                $( '#dummy_input' ).val( ui.item.name );
+                $( '#msg_outbox_pe_id' ).val( ui.item.id );
+                return false;
+            }
+        })
+        .data( 'autocomplete' )._renderItem = function( ul, item ) {
+            return $( '<li></li>' )
+                .data( 'item.autocomplete', item )
+                .append( '<a>' + item.name + '</a>' )
+                .appendTo( ul );
+        };
+    }
+    
+    if ($('#msg_outbox_pr_message_method').val() != 1) {
+        // SMS/Tweets don't have subjects
+        $('#msg_log_subject__row').hide();
+    }
+    $('#msg_outbox_pr_message_method').change(function() {
+        if ($(this).val() == 'EMAIL') {
+            // Emails have a Subject
+            $('#msg_log_subject__row').show();
+        } else {
+            // SMS/Tweets don't
+            $('#msg_log_subject__row').hide();
+        }
+    });
+});
+//]]></script>

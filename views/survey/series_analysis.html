@@ -1,0 +1,14 @@
+{{extend "layout.html"}}
+{{try:}}
+  {{=chart}}
+{{except:}}
+{{pass}}
+{{try:}}
+  {{=sform}}
+{{except:}}
+{{pass}}
+{{include "_create.html"}}
+{{try:}}
+  {{=XML(debug)}}
+{{except:}}
+{{pass}}

@@ -1,0 +1,7 @@
+{{for comment in comments:}}
+<div class='delphi_comment'>
+  on {{=comment.created_on}} {{=s3_user_represent(comment.created_by)}}
+  says <span class='delphi_comment_body'>{{=comment.body}}</span>
+</div>
+{{pass}}
+{{=form}}

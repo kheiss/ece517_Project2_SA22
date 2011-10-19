@@ -1,0 +1,76 @@
+<html>
+    <head>
+        {{include "jquery.html"}}
+        <script><!--
+
+function ChartManager(view_URL) {
+    /*
+    This is designed to interface with a graph-generating view that knows
+    how to combine data sets on a graph so that the user can interactively
+    create graphs showing multiple things.
+    */
+    var self = this
+    
+    self.update_chart = function () {
+        var url_parts = []
+        $('#chart_spec_list li input:checked').each(
+            function (index, element) {
+                url_parts.push(
+                    $(element).attr('value')
+                )
+            }
+        )
+        
+        $('#chart').attr(
+            'src',
+            view_URL+'?spec='+('['+url_parts.join(',')+']')
+        )
+    }
+    
+    self.addChartSpec = function (chart_url, chart_name) {
+        var list_item = $(document.createElement('li'))
+        var id = $('#chart_spec_list li input').length
+        var list_item_id = 'list_item'+id
+        var list_checkbox = $(document.createElement('input')).attr({
+            id: list_item_id,
+            value: chart_url,
+            type: 'checkbox',
+            checked: true
+        }).click(function () {
+            self.update_chart()
+        })
+        list_item.append(list_checkbox)
+        
+        var editable_list_label = $(document.createElement('input')).attr({
+            id: 'chart_name_input'+id,
+            value: chart_name,
+            type: 'text',
+            size: 100
+        })
+        list_item.append(editable_list_label)
+        
+        $('#chart_spec_list').append(list_item)
+        self.update_chart()
+    }
+    
+    self.removeChartSpec = function (chart_url) {
+        // unimplemented, the user may close the window 
+        // to clear the charts
+    }
+}
+
+-->
+        </script>
+        <style type='text/css'>
+            #chart_spec_list li {
+                list-style: none;
+            }
+        </style>
+    </head>
+    <body>
+        <img id="chart" width="640px" height="480px" />
+        <ul id="chart_spec_list">
+            
+        </ul>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+@charset "UTF-8";
+
+/* Delphi Decision Maker - Voting Page */
+.delphi_li_i {
+   color: #888a85;
+    font-style: italic;
+}
+.delphi_li_n {
+}
+.delphi_li_v {
+    font-weight: bold;
+}
+.delphi_ic {
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: normal;
+}
+#saving {
+    padding: 3px 10px;
+    background-color: #fe5c00;
+    color: #eeeeec;
+}
+#saving.saved {
+    background-color: #4e9a06;
+}
+#comp_tr td {
+    background-color: #e9b96e;
+    cursor: pointer;
+}
+#comp_tr td:hover {
+    background-color: #8ae234;
+}

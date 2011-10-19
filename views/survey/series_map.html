@@ -1,0 +1,44 @@
+{{extend "layout.html"}}
+{{try:}}
+ {{=H2(title)}}
+{{except:}}
+ {{pass}}
+<div id='rheader'>
+ {{try:}}
+  {{=XML(rheader)}}
+</div>
+<div id='component'>
+ {{except:}}
+<div>
+ {{pass}}
+ {{try:}}
+  {{=H3(subtitle)}}
+ {{except:}}
+  {{pass}}
+ <div class='survey_map-legend'>
+  <table>
+   <tr>
+    <td>
+     {{try:}}
+      {{=legend}}
+     {{except:}}
+      {{pass}}
+    </td>
+    <td>
+     <div class='survey_map-priority-selector'>
+      {{try:}}
+       {{=form}}
+      {{except:}}
+       {{pass}}
+     </div>
+    </td>
+   </tr>
+  </table>
+ </div>
+ <div class='survey_map-container'>
+  {{try:}}
+   {{=map}}
+  {{except:}}
+   {{pass}}
+ </div>
+</div>

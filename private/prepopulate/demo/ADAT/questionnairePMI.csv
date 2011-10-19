@@ -1,0 +1,19 @@
+"Template","Template Description","Complete Question","Date Question","Time Question","Location Question","Priority Question","Section","Section Position","Question","Question Type","Question Notes","Question Position","Question Code","Meta Data"
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Assessment data",1,"Date","Date",,1,"PMI-Ass-1",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Assessment data",1,"Type of assessment","OptionOther",,2,"PMI-Ass-2","(Length, 3) (1, Early) (2, Continue) (Other, String)"
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Assessment data",1,"Location","Option",,3,"PMI-Ass-3","(Length, 5) (1, Where the disaster happened) (2, IDP's camp) (3, Relocation camp) (4, Return to origin place) (5, Local community – in situ)"
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Province","Location",,4,"PMI-Gen-1",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"District","Location",,5,"PMI-Gen-2",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Sub District","Location",,6,"PMI-Gen-3",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Village","Location",,7,"PMI-Gen-4",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Sub Village","Location",,8,"PMI-Gen-5",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Name of Location","Location",,9,"PMI-Gen-6",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Type of disaster event","OptionOther",,10,"PMI-Gen-7","(Length, 4) (1, Natural Disaster) (2, Conflict) (3, Accident) (Other, String)"
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"Cause of the catastrophic event","String",,11,"PMI-Gen-8",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"General",2,"When it happened","String",,12,"PMI-Gen-9",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"No of Households","Numeric",,13,"PMI-Dem-1",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"No of Individuals","Numeric",,14,"PMI-Dem-2",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"Population","Grid",,15,"PMI-Dem-","(Subtitle, Population) (QuestionNo, 3) (col-cnt, 2) (row-cnt, 6) (columns, | Male| Female |) (rows, |No of Babies 0-5 years old | No of Children 6-12 years old | No of Age  12-20 years old | No of Age 21-60 years old | No of Elderly >60 years old | No of Disabled people|) (data, | Numeric | Numeric | * | Numeric | Numeric| * | Numeric | Numeric | * | Numeric | Numeric | * | Numeric | Numeric | * | Numeric | Numeric |)"
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"No of Pregnant Women","Numeric",,27,"PMI-Dem-15",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"No of Lactating Mothers","Numeric",,28,"PMI-Dem-16",
+"PMI","Emergency assessment form PMI",,"PMI-Ass-1",,"PMI-Gen-6",,"Demographic data",3,"No of Women as head of household","Numeric",,29,"PMI-Dem-17",

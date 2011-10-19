@@ -1,0 +1,16 @@
+{{extend "layout.html"}}
+<div style='margin:10px auto; width:96%; max-width:1000px;' >
+<div id='home'>
+
+    {{=XML(map)}}
+
+    {{include "gis/legend.html"}}
+
+    <div class='col3left'>
+      <ol style='list-style-type: none;'>
+        {{=LI(SPAN(A(T("View Fullscreen Map"), _href=URL(c="gis", f="map_viewing_client")), _style="font-weight: bold;"), _style="margin-top:1em;")}}
+      </ol>
+    </div>
+
+</div>
+</div>

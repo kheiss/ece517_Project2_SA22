@@ -1,0 +1,7 @@
+{{extend "layout.html"}}
+<div id='rheader'>
+ {{=rheader}}
+</div>
+<div id='component'>
+{{=LOAD("delphi", "comments.load", args=[solution_id], ajax=True)}}
+</div>

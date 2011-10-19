@@ -1,0 +1,32 @@
+{{extend "layout.html"}}
+<div id='rheader'>
+ {{=rheader}}
+</div>
+<div id='component'>
+{{if duser.can_vote:}}
+  <div id='vote_div'>
+    <p>
+    {{if voted:}}
+        {{=T("Your current ordered list of solution items is shown below. You can change it by voting again.")}}
+    {{else:}}
+        {{=T("Here are the solution items related to the problem.")}}
+    {{pass}}
+    {{= T("After clicking on the button, a set of paired items will be shown one by one. Please select the one solution from each pair that you prefer over the other.")}}
+    </p>
+    <table class='delphi_wide'><tr id='comp_tr'><td>&nbsp;</td></tr></table>
+    <ul id='vote_items' style='margin-left: 40px;'></ul>
+    <p>
+    <button id='vote_button'>
+     {{if voted:}}
+        {{=T("Update your current ordered list")}}
+     {{else:}}
+        {{=T("Vote")}}
+     {{pass}}
+    </button>
+    <span id='saving' style='display: none;'> </span>
+    </p>
+  </div>
+{{else:}}
+<p>{{=T("You are not allowed to Vote")}}</p>
+{{pass}}
+</div>
