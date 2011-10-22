@@ -47,3 +47,4 @@ __init__.pyc
 *.log
 *.pyc
 .*.swp
+.swp

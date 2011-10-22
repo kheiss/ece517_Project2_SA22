@@ -186,7 +186,7 @@ if deployment_settings.has_module(module):
                             Field("name", label = T("Short Description"),
                                   requires = IS_NOT_EMPTY()),
                             Field("message", "text", label = T("Message"),
-                                  represent = lambda message: s3_truncate(message, text, length=48, nice=True)),
+                                  represent = lambda message: s3_truncate(message, length=48, nice=True)),
                             Field("category", label = T("Category"),
                                   # The full set available to Admins & Imports/Exports
                                   # (users use the subset by over-riding this in the Controller)
