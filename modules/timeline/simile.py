@@ -132,9 +132,9 @@ class SimileTimeline(object):
     # to add times as a string
     def formatTime(self, obj):
         if type(obj) is datetime:
-            return obj.isoformat(' ')
+            return obj.isoformat('T')
         elif type(obj) is date:
-            return datetime.combine(date, time()).isoformat(' ')
+            return datetime.combine(date, time()).isoformat('T')
         else:
             self.log("Unable to convert from type %s" % type(obj))
             return None
@@ -154,14 +154,18 @@ class SimileTimeline(object):
     <script src="%(src_url)s" type="text/javascript"></script>
     
     <script>
+        var tl;
         function onLoad() {
-            var event_data = %(event_var)s;
-            var date_now = %(date_now)s;
+            var tl_el = document.getElementById("my-timeline");
             var eventSource = new Timeline.DefaultEventSource();
+            var theme = Timeline.ClassicTheme.create();
+
+            var event_data = %(event_var)s;
+
             var bandInfos = [
                 Timeline.createBandInfo({
                     eventSource:    eventSource,
-                    date:           %(date_now)s,
+                    date:           "%(date_now)s",
                     width:          "70%%", 
                     intervalUnit:   Timeline.DateTime.MONTH, 
                     intervalPixels: 100
@@ -169,7 +173,7 @@ class SimileTimeline(object):
                 Timeline.createBandInfo({
                     overview:       true,
                     eventSource:    eventSource,
-                    date:           %(date_now)s,
+                    date:           "%(date_now)s",
                     width:          "30%%", 
                     intervalUnit:   Timeline.DateTime.YEAR, 
                     intervalPixels: 200
@@ -177,8 +181,8 @@ class SimileTimeline(object):
             ];
             bandInfos[1].syncWith = 0;
             bandInfos[1].highlight = true;
-   
-            tl = Timeline.create(document.getElementById("my-timeline"), bandInfos);
+
+            tl = Timeline.create(tl_el, bandInfos);
             eventSource.loadJSON(event_data, document.location.href);
         }
 
@@ -195,12 +199,12 @@ class SimileTimeline(object):
         
     <body onload="onLoad();" onresize="onResize();">
         Timeline here
-        <div id="my-timeline" style="height: 150px; border: 1px solid #aaa"></div>
+        <div id="my-timeline" style="height: 300px; border: 1px solid #aaa"></div>
         <noscript>
             This page uses Javascript to show you a Timeline. Please enable Javascript in your browser to see the full page. Thank you.
         </noscript>
     </body>
-        ''' % {'src_url': self.SRC_URL, 'event_var': self.data_to_json(), 'date_now': datetime.now().isoformat(' ')}
+        ''' % {'src_url': self.SRC_URL, 'event_var': self.data_to_json(), 'date_now': datetime.now().isoformat('T')}
 
         return code
 
