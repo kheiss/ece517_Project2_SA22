@@ -8,6 +8,7 @@ class SimileTimeline(object):
     """Timeline using Simile Widgets implementation"""
 
     # An example of running this might be:
+    # From "python web2py.py -S eden -M" console
     #
     # import applications.eden.modules.timeline.simile as simile
     # tl = simile.SimileTimeline()
