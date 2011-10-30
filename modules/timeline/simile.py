@@ -138,7 +138,7 @@ class SimileTimeline(object):
         if type(obj) is datetime:
             return obj.isoformat('T')
         elif type(obj) is date:
-            return datetime.combine(date, time()).isoformat('T')
+            return datetime.combine(obj, time()).isoformat('T')
         else:
             self.log("Unable to convert from type %s" % type(obj))
             return None
