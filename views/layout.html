@@ -71,6 +71,11 @@
   {{pass}}
 //]]></script>
 
+<!-- Include dynamically added head Scripts -->
+{{for script in response.s3.scripts_head:}}
+    {{=SCRIPT(_src = script)}}
+{{pass}}
+
 {{try:}}
   {{if r.representation == "popup":}}
     {{representation = "popup"}}
@@ -151,7 +156,7 @@
    </script>
 -->
 
-<!-- Include dynamically added Scripts -->
+<!-- Include dynamically added body Scripts -->
 {{for script in response.s3.scripts:}}
     {{=SCRIPT(_src = script)}}
 {{pass}}

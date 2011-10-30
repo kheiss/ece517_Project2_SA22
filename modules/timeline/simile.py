@@ -4,6 +4,8 @@ import xml
 
 from datetime import datetime, date, time
 
+from gluon import *
+
 class SimileTimeline(object):
     """Timeline using Simile Widgets implementation"""
 
@@ -35,7 +37,8 @@ class SimileTimeline(object):
         # Because they do not point to the database, these entries do not get updated unless
         # done so manually.
         self.events = []
-
+    
+    # Need to define this to actually log
     def log(self, msg):
         print msg
 
@@ -108,6 +111,7 @@ class SimileTimeline(object):
 
                 # When doing these row accesses, we should make sure they actually exist
                 # and catch any exceptions
+                # try: {} except KeyError: {}
                 event['title'] = row[title]
                 event['start'] = self.formatTime(row[start])
 
@@ -149,62 +153,74 @@ class SimileTimeline(object):
     def data_to_js(self):
        return "var event_data = %s;" % self.data_to_json()
     
+    # Can we dynamically determine the scaling based on event proximity?
+    # We should also use gluon's HTML generation helpers where we can here
     def generateCode(self):
-        code = '''
-    <script src="%(src_url)s" type="text/javascript"></script>
-    
-    <script>
-        var tl;
-        function onLoad() {
-            var tl_el = document.getElementById("my-timeline");
-            var eventSource = new Timeline.DefaultEventSource();
-            var theme = Timeline.ClassicTheme.create();
+        body = []
+        code = ""
 
-            var event_data = %(event_var)s;
+        # Generate the timeline javascript
+        # We should probably have a way for the user to specify the time intervalUnit
+        body.append(SCRIPT('''
+            function onLoad() {
+                var tl;
+                var tl_el = document.getElementById("my-timeline");
+                var eventSource = new Timeline.DefaultEventSource();
+                var theme = Timeline.ClassicTheme.create();
 
-            var bandInfos = [
-                Timeline.createBandInfo({
-                    eventSource:    eventSource,
-                    date:           "%(date_now)s",
-                    width:          "70%%", 
-                    intervalUnit:   Timeline.DateTime.MONTH, 
-                    intervalPixels: 100
-                }),
-                Timeline.createBandInfo({
-                    overview:       true,
-                    eventSource:    eventSource,
-                    date:           "%(date_now)s",
-                    width:          "30%%", 
-                    intervalUnit:   Timeline.DateTime.YEAR, 
-                    intervalPixels: 200
-                })
-            ];
-            bandInfos[1].syncWith = 0;
-            bandInfos[1].highlight = true;
+                var event_data = %(event_var)s;
 
-            tl = Timeline.create(tl_el, bandInfos);
-            eventSource.loadJSON(event_data, document.location.href);
-        }
+                var bandInfos = [
+                    Timeline.createBandInfo({
+                        eventSource:    eventSource,
+                        date:           "%(date_now)s",
+                        width:          "70%%", 
+                        intervalUnit:   Timeline.DateTime.WEEK, 
+                        intervalPixels: 100
+                    }),
+                    Timeline.createBandInfo({
+                        overview:       true,
+                        eventSource:    eventSource,
+                        date:           "%(date_now)s",
+                        width:          "30%%", 
+                        intervalUnit:   Timeline.DateTime.MONTH, 
+                        intervalPixels: 200
+                    })
+                ];
+                bandInfos[1].syncWith = 0;
+                bandInfos[1].highlight = true;
 
-        var resizeTimerID = null;
-        function onResize() {
-            if (resizeTimerID == null) {
-                resizeTimerID = window.setTimeout(function() {
-                    resizeTimerID = null;
-                    tl.layout();
-                }, 500);
+                tl = Timeline.create(tl_el, bandInfos);
+                tl.showLoadingMessage();
+                eventSource.loadJSON(event_data, document.location.href);
+                tl.hideLoadingMessage();
             }
-        }
-    </script>
+
+            var resizeTimerID = null;
+            function onResize() {
+                if (resizeTimerID == null) {
+                    resizeTimerID = window.setTimeout(function() {
+                        resizeTimerID = null;
+                        tl.layout();
+                    }, 500);
+                }
+            }
+            
+            window.onload = onLoad;
+            window.onresize = onResize;
+        ''' % {'event_var': self.data_to_json(), 'date_now': datetime.now().isoformat('T')} ))
         
-    <body onload="onLoad();" onresize="onResize();">
-        Timeline here
-        <div id="my-timeline" style="height: 300px; border: 1px solid #aaa"></div>
-        <noscript>
-            This page uses Javascript to show you a Timeline. Please enable Javascript in your browser to see the full page. Thank you.
-        </noscript>
-    </body>
-        ''' % {'src_url': self.SRC_URL, 'event_var': self.data_to_json(), 'date_now': datetime.now().isoformat('T')}
+        # Generate the body code
+        body.append(DIV(_id="my-timeline", _style="height: 300px; border: 1px solid #aaa"))
+        body.append(TAG['noscript']("This page uses Javascript to show you a Timeline. Please enable Javascript in your browser to see the full page. Thank you."))
+
+        # Add the timeline script source to the head
+        current.response.s3.scripts_head.append(self.SRC_URL)
+
+        # How should we write this code to the view?  response.write? does s3 have a variant?
+        # For now we just convert to a string and return it
+        for i in body:
+            code += i.xml()
 
         return code
 

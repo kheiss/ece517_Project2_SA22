@@ -181,6 +181,7 @@ response.s3.stylesheets = []
 response.s3.external_stylesheets = []
 s3_script_dir = "/%s/static/scripts/S3" % request.application
 response.s3.script_dir = s3_script_dir
+s3.scripts_head = []
 # To get included at the end of <BODY>
 s3.scripts = []
 s3.js_global = []

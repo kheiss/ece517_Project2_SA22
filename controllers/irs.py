@@ -9,6 +9,8 @@
 module = request.controller
 resourcename = request.function
 
+simileTimeline = local_import('timeline/simile')
+
 if not deployment_settings.has_module(module):
     raise HTTP(404, body="Module disabled: %s" % module)
 
@@ -40,6 +42,13 @@ def icategory():
 
     output = s3_rest_controller(module, resourcename)
     return output
+
+# -----------------------------------------------------------------------------
+def irs_timeline():
+    tl = simileTimeline.SimileTimeline()
+    tl.addEventSource(db=db, query=db.irs_ireport, title='name', desc='message', start='datetime')
+    timeline = tl.generateCode()
+    return dict(timeline=timeline)
 
 # -----------------------------------------------------------------------------
 def ireport():
