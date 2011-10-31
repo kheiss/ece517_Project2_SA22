@@ -12,13 +12,11 @@ class SimileTimeline(object):
     # An example of running this might be:
     # From "python web2py.py -S eden -M" console
     #
-    # import applications.eden.modules.timeline.simile as simile
+    # simile = local_import('timeline/simile')
     # tl = simile.SimileTimeline()
     # tl.addEventSource(db=db, query=db.irs_ireport, title='name', desc='message', start='datetime')
-    # data = tl.generateData()
-    #
-    # or if we want the output to be a javascript variable 
-    # js_var = tl.events_to_js() 
+    # timeline = tl.generateCode()
+    # return dict(timeline=timeline)
 
     # Notes:
     #
@@ -26,6 +24,8 @@ class SimileTimeline(object):
     # own class for generating and checking events.  This would allow this class to be reusable
     # across different timeline implementations potentially.
 
+    # This is the path to the timeline javascript library
+    # Should this be local instead?
     SRC_URL = 'http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true'
 
     def __init__(self):
@@ -105,7 +105,6 @@ class SimileTimeline(object):
             desc = source['desc']
             start = source['start']
             end = source['end']
-            #for row in db().select(db.irs_ireport.ALL):
             for row in db(query).select():
                 event = {}
 
@@ -162,8 +161,8 @@ class SimileTimeline(object):
         # Generate the timeline javascript
         # We should probably have a way for the user to specify the time intervalUnit
         body.append(SCRIPT('''
+            var tl;
             function onLoad() {
-                var tl;
                 var tl_el = document.getElementById("my-timeline");
                 var eventSource = new Timeline.DefaultEventSource();
                 var theme = Timeline.ClassicTheme.create();
@@ -214,7 +213,9 @@ class SimileTimeline(object):
         body.append(DIV(_id="my-timeline", _style="height: 300px; border: 1px solid #aaa"))
         body.append(TAG['noscript']("This page uses Javascript to show you a Timeline. Please enable Javascript in your browser to see the full page. Thank you."))
 
-        # Add the timeline script source to the head
+        # Add the timeline library to the HEAD.  While we would generally like to 
+        # put it in the body with the rest of the code, there is a bug in the timeline
+        # that prevents this from working.
         current.response.s3.scripts_head.append(self.SRC_URL)
 
         # How should we write this code to the view?  response.write? does s3 have a variant?
