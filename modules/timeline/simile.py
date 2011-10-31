@@ -83,12 +83,9 @@ class SimileTimeline(object):
     # This function doesn't take actual data as parameters but rather information that it
     # uses to query the database. This information is then used to convert the database
     # query into data that the timeline can read.
-    def addEventSource(self, db=None, query=None, title=None, desc=None, start=None, end=None):
-        if db == None:
-            self._log("A database connection must be provided!")
-            return False
-        if query == None:
-            self._log("A query must be provided!")
+    def addEventSource(self, table=None, filter=None, title=None, desc=None, start=None, end=None):
+        if table == None:
+            self._log("A database table must be provided!")
             return False
         if title == None:
             self._log("A title mapping must be provided!")
@@ -99,8 +96,8 @@ class SimileTimeline(object):
 
         # We could probably put this in a new class called EventSource
         source = {}
-        source['db'] = db
-        source['query'] = query
+        source['table'] = table
+        source['filter'] = filter
         source['title'] = title
         source['desc'] = desc
         source['start'] = start
@@ -138,29 +135,35 @@ class SimileTimeline(object):
         # Add the data provided by the event sources
         for source in self.sources:
             # Define these for convenience
-            db = source['db']
-            query = source['query']
+            table = source['table']
+            filter = source['filter']
             title = source['title']
             desc = source['desc']
             start = source['start']
             end = source['end']
 
-            for row in db(query).select():
+            # Get our table entries and filter them if needed
+            db = table._db
+            rows = db(table).select()
+            if filter != None and isinstance(filter, type(lambda: None)):
+                rows = rows.find(filter) 
+
+            for row in rows:
                 event = {}
 
-                # When doing these row accesses, we should make sure they actually exist
+                # When doing these row accesses, we make sure they actually exist
                 # and catch any exceptions, skipping that entry
-                # try: {} except KeyError: {}
                 try:
-                    event['title'] = row[title]
+                    event['title'] = self._getStringRepresentation(table, row, title)
+                    if event['title'] == None:
+                        continue
+
                     event['start'] = self._formatTime(row[start])
 
                     if desc != None:
-                        #repFunc = eval("query.%s.represent" % desc)
-                        #if repFunc != None:
-                        #    event['description'] = str(repFunc(row[desc]))
-                        #else:
-                        event['description'] = row[desc]
+                        event['description'] = self._getStringRepresentation(table, row, desc)
+                        if event['description'] == None:
+                            continue
 
                     if end != None:
                         event['end'] = self._formatTime(row[end])
@@ -178,6 +181,26 @@ class SimileTimeline(object):
             data['events'].append(event)
 
         return data
+
+    # Attempts to use the represent lambda attribute to transform an otherwise
+    # incoherent piece of data
+    def _getStringRepresentation(self, table, row, attr):
+        # We do a lot of accesses with potential exceptions here, so lets just
+        # wrap the whole thing in a try block
+        try:
+            # Simple sanity check for empty values
+            if table == None or row[attr] == None:
+                return row[attr]
+
+            # Check to see if we got a represent lambda and run it, otherwise return the 
+            # string value of the Field
+            repLambda = eval("table.%s.represent" % attr)
+            if repLambda != None and isinstance(repLambda, type(lambda: None)):
+                return str(repLambda(row[attr]))
+            else:
+                return row[attr]
+        except KeyError:  # Does this catch all of the possible exceptions?
+            return None
 
     # Maybe this needs to be updated to allow parsing text in case the user wishes
     # to add times as a string

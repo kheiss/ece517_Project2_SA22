@@ -46,7 +46,7 @@ def icategory():
 # -----------------------------------------------------------------------------
 def irs_timeline():
     tl = simileTimeline.SimileTimeline()
-    tl.addEventSource(db=db, query=db.irs_ireport, title='name', desc='message', start='datetime')
+    tl.addEventSource(table=db.irs_ireport, title='name', desc='message', start='datetime')
     timeline = tl.generateCode()
     return dict(timeline=timeline)
 
