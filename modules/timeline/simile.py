@@ -26,7 +26,18 @@ class SimileTimeline(object):
 
     # This is the path to the timeline javascript library
     # Should this be local instead?
-    SRC_URL = 'http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true'
+    _SRC_URL = 'http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true'
+
+    # This maps the default timeline intervals
+    _INTERVAL_MAP = {
+        'SEC' : 'Timeline.DateTime.SECOND',
+        'MIN' : 'Timeline.DateTime.MINUTE',
+        'HOUR' : 'Timeline.DateTime.HOUR',
+        'DAY' : 'Timeline.DateTime.DAY',
+        'WEEK' : 'Timeline.DateTime.WEEK',
+        'MONTH' : 'Timeline.DateTime.MONTH',
+        'YEAR' : 'Timeline.DateTime.YEAR',
+    }
 
     def __init__(self):
         # Sources point to a database query and map the rows to timeline parameters.  Every
@@ -37,26 +48,53 @@ class SimileTimeline(object):
         # Because they do not point to the database, these entries do not get updated unless
         # done so manually.
         self.events = []
+
+        # Default timeline scales
+        self.mainTimelineScale = 'WEEK'
+        self.overviewTimelineScale = 'MONTH'
     
-    # Need to define this to actually log
-    def log(self, msg):
+    # Need to define this to actually log to web2py
+    def _log(self, msg):
         print msg
+
+    # Accessor methods for mainTimelineScale
+    def setMainTimelineScale(self, scale):
+        if scale in self._INTERVAL_MAP:
+            self.mainTimelineScale = scale
+            return True
+        else:
+            return False
+
+    def getMainTimelineScale(self):
+        return self.mainTimelineScale
+
+    # Accessor methods for overviewTimelineScale
+    def setOverviewTimelineScale(self, scale):
+        if scale in self._INTERVAL_MAP:
+            self.overviewTimelineScale = scale
+            return True
+        else:
+            return False
+
+    def getOverviewTimelineScale(self):
+        return self.overviewTimelineScale
+
 
     # This function doesn't take actual data as parameters but rather information that it
     # uses to query the database. This information is then used to convert the database
     # query into data that the timeline can read.
     def addEventSource(self, db=None, query=None, title=None, desc=None, start=None, end=None):
         if db == None:
-            self.log("A database connection must be provided!")
+            self._log("A database connection must be provided!")
             return False
-        elif query == None:
-            self.log("A query must be provided!")
+        if query == None:
+            self._log("A query must be provided!")
             return False
-        elif title == None:
-            self.log("A title mapping must be provided!")
+        if title == None:
+            self._log("A title mapping must be provided!")
             return False
-        elif start == None:
-            self.log("A start mapping must be provided!")
+        if start == None:
+            self._log("A start mapping must be provided!")
             return False
 
         # We could probably put this in a new class called EventSource
@@ -73,18 +111,18 @@ class SimileTimeline(object):
     # The dates entered here must either be of type date or datetime
     def addEvent(self, title=None, desc=None, start=None, end=None):
         if title == None:
-            self.log("A title must be provided!")
+            self._log("A title must be provided!")
             return False
         elif start == None:
-            self.log("A start date must be provided!")
+            self._log("A start date must be provided!")
             return False
 
         event = {}
         event['title'] = title
         event['description'] = desc
-        event['start'] = self.formatTime(start)
+        event['start'] = self._formatTime(start)
         if end != None:
-            event['end'] = self.formatTime(end)
+            event['end'] = self._formatTime(end)
             event['durationEvent'] = True
         else:
             event['durationEvent'] = False
@@ -92,36 +130,46 @@ class SimileTimeline(object):
         self.events.append(event)
         return True
 
-    def generateData(self):
+    def _generateData(self):
         data = {}
         data['dateTimeFormat'] = 'iso8601'
         data['events'] = []
 
         # Add the data provided by the event sources
         for source in self.sources:
+            # Define these for convenience
             db = source['db']
             query = source['query']
             title = source['title']
             desc = source['desc']
             start = source['start']
             end = source['end']
+
             for row in db(query).select():
                 event = {}
 
                 # When doing these row accesses, we should make sure they actually exist
-                # and catch any exceptions
+                # and catch any exceptions, skipping that entry
                 # try: {} except KeyError: {}
-                event['title'] = row[title]
-                event['start'] = self.formatTime(row[start])
+                try:
+                    event['title'] = row[title]
+                    event['start'] = self._formatTime(row[start])
 
-                if desc != None and row[desc] != None:
-                    event['description'] = row[desc]
+                    if desc != None:
+                        #repFunc = eval("query.%s.represent" % desc)
+                        #if repFunc != None:
+                        #    event['description'] = str(repFunc(row[desc]))
+                        #else:
+                        event['description'] = row[desc]
 
-                if end != None and row[end] != None:
-                    event['end'] = self.formatTime(row[end])
-                    event['durationEvent'] = True
-                else:
-                    event['durationEvent'] = False
+                    if end != None:
+                        event['end'] = self._formatTime(row[end])
+                        event['durationEvent'] = True
+                    else:
+                        event['durationEvent'] = False
+                except KeyError as detail:
+                    self._log("Caught error: %s\n Skipping..." % detail)
+                    continue
 
                 data['events'].append(event)
 
@@ -133,25 +181,21 @@ class SimileTimeline(object):
 
     # Maybe this needs to be updated to allow parsing text in case the user wishes
     # to add times as a string
-    def formatTime(self, obj):
+    def _formatTime(self, obj):
         if type(obj) is datetime:
             return obj.isoformat('T')
         elif type(obj) is date:
             return datetime.combine(obj, time()).isoformat('T')
         else:
-            self.log("Unable to convert from type %s" % type(obj))
+            self._log("Unable to convert from type %s" % type(obj))
             return None
 
-    def data_to_xml(self):
-        return self.generateData().xml()
+    def _data_to_xml(self):
+        return self._generateData().xml()
 
-    def data_to_json(self):
-       return json.dumps(self.generateData())
+    def _data_to_json(self):
+       return json.dumps(self._generateData())
 
-    # Not sure if we really need this anymore
-    def data_to_js(self):
-       return "var event_data = %s;" % self.data_to_json()
-    
     # Can we dynamically determine the scaling based on event proximity?
     # We should also use gluon's HTML generation helpers where we can here
     def generateCode(self):
@@ -174,7 +218,7 @@ class SimileTimeline(object):
                         eventSource:    eventSource,
                         date:           "%(date_now)s",
                         width:          "70%%", 
-                        intervalUnit:   Timeline.DateTime.WEEK, 
+                        intervalUnit:   %(main_scale)s, 
                         intervalPixels: 100
                     }),
                     Timeline.createBandInfo({
@@ -182,7 +226,7 @@ class SimileTimeline(object):
                         eventSource:    eventSource,
                         date:           "%(date_now)s",
                         width:          "30%%", 
-                        intervalUnit:   Timeline.DateTime.MONTH, 
+                        intervalUnit:   %(overview_scale)s, 
                         intervalPixels: 200
                     })
                 ];
@@ -207,7 +251,12 @@ class SimileTimeline(object):
             
             window.onload = onLoad;
             window.onresize = onResize;
-        ''' % {'event_var': self.data_to_json(), 'date_now': datetime.now().isoformat('T')} ))
+        ''' % {
+            'event_var': self._data_to_json(), 
+            'date_now': datetime.now().isoformat('T'), 
+            'main_scale': self._INTERVAL_MAP[self.mainTimelineScale], 
+            'overview_scale': self._INTERVAL_MAP[self.overviewTimelineScale]
+            } ))
         
         # Generate the body code
         body.append(DIV(_id="my-timeline", _style="height: 300px; border: 1px solid #aaa"))
@@ -216,7 +265,7 @@ class SimileTimeline(object):
         # Add the timeline library to the HEAD.  While we would generally like to 
         # put it in the body with the rest of the code, there is a bug in the timeline
         # that prevents this from working.
-        current.response.s3.scripts_head.append(self.SRC_URL)
+        current.response.s3.scripts_head.append(self._SRC_URL)
 
         # How should we write this code to the view?  response.write? does s3 have a variant?
         # For now we just convert to a string and return it
