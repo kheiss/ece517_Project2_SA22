@@ -223,7 +223,7 @@ class SimileTimelineTest(unittest.TestCase):
     # should raise a TypeError when addEventSource() is called with null title
     def testAddEventSourceNoTitle(self):
         
-        self.table= db.irs_ireport.id > 0 # web2py query to select all the rows in the irs_ireport table
+        self.table= db.irs_ireport
         self.filter = None # optional
         self.title = None # required
         self.description = "message" # optional
@@ -238,7 +238,7 @@ class SimileTimelineTest(unittest.TestCase):
     # should raise a TypeError when addEventSource() is called with null start
     def testAddEventSourceNoStart(self):
         
-        self.table= db.irs_ireport.id > 0 # web2py query to select all the rows in the irs_ireport table
+        self.table= db.irs_ireport
         self.filter = None # optional
         self.title = "name" # required
         self.description = "message" # optional
@@ -256,7 +256,7 @@ class SimileTimelineTest(unittest.TestCase):
         # location_id, verified, actioned, comments, uuid, mci, deleted, deleted_fk,
         # created_on, modified_on, created_by, modified_by, owned_by_user, owned_by_role,
         # owned_by_organization, owned_by_facility
-        self.table = db.irs_ireport.id > 0 # web2py query to select all the rows in the irs_ireport table
+        self.table = db.irs_ireport 
         self.filter = None # optional
         self.title = "name" # required
         self.description = "message" # optional
@@ -278,7 +278,7 @@ class SimileTimelineTest(unittest.TestCase):
         # We use the irs_icategory table of the Eden database as a source of events.
         # The irs_icategory table contains the following fields:
         # id, code, created_on, modified_on
-        self.table = db.irs_icategory.id > 0 # web2py query to select all the rows in the irs_icategory table
+        self.table = db.irs_icategory
         self.filter = None # optional
         self.title = "code" # required
         self.description = None # optional
@@ -306,7 +306,7 @@ class SimileTimelineTest(unittest.TestCase):
         # We use the irs_icategory table of the Eden database as a source of events.
         # The irs_icategory table contains the following fields:
         # id, code, created_on, modified_on
-        self.table = db.irs_icategory.id > 0 # web2py query to select all the rows in the irs_icategory table
+        self.table = db.irs_icategory
         self.filter = None # optional
         self.title = "code" # required
         self.description = None # optional
