@@ -13,6 +13,8 @@
 module = request.controller
 resourcename = request.function
 
+simileTimeline = local_import('timeline/simile')
+
 if not deployment_settings.has_module(module):
     raise HTTP(404, body="Module disabled: %s" % module)
 
@@ -912,6 +914,14 @@ def send_commit():
     redirect(URL(c = "inv",
                  f = "send",
                  args = [send_id]))
+
+# =============================================================================
+def inv_timeline():
+    tl = simileTimeline.SimileTimeline()
+    tl.addEventSource(table=db.inv_recv, title='type', desc='comments', start='date')
+    tl.addEventSource(table=db.inv_send_item, title='inv_item_id', desc='comments', start='send_id.date', end='send_id.delivery_date')
+    timeline = tl.generateCode()
+    return dict(timeline=timeline)
 
 # =============================================================================
 def recv_item_json():

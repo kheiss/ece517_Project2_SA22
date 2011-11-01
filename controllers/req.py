@@ -11,6 +11,8 @@
 module = request.controller
 resourcename = request.function
 
+simileTimeline = local_import('timeline/simile')
+
 if not deployment_settings.has_module(module):
     raise HTTP(404, body="Module disabled: %s" % module)
 
@@ -563,5 +565,12 @@ def commit_item_json():
 
     response.headers["Content-Type"] = "application/json"
     return json_str
+
+# =============================================================================
+def req_timeline():
+    tl = simileTimeline.SimileTimeline()
+    tl.addEventSource(table=db.req_req, title='event_id.name', start='date_required', end='date_required_until')
+    timeline = tl.generateCode()
+    return dict(timeline=timeline)
 
 # END =========================================================================

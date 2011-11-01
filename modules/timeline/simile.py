@@ -14,7 +14,7 @@ class SimileTimeline(object):
     #
     # simile = local_import('timeline/simile')
     # tl = simile.SimileTimeline()
-    # tl.addEventSource(db=db, query=db.irs_ireport, title='name', desc='message', start='datetime')
+    # tl.addEventSource(table=db.irs_ireport, title='name', desc='message', start='datetime')
     # timeline = tl.generateCode()
     # return dict(timeline=timeline)
 
@@ -40,7 +40,7 @@ class SimileTimeline(object):
     }
 
     def __init__(self):
-        # Sources point to a database query and map the rows to timeline parameters.  Every
+        # Sources point to a database table and map the rows to timeline parameters.  Every
         # time the data is generated, this information is pulled from the database.
         self.sources = []
 
@@ -52,10 +52,12 @@ class SimileTimeline(object):
         # Default timeline scales
         self.mainTimelineScale = 'WEEK'
         self.overviewTimelineScale = 'MONTH'
+
     
     # Need to define this to actually log to web2py
     def _log(self, msg):
         print msg
+
 
     # Accessor methods for mainTimelineScale
     def setMainTimelineScale(self, scale):
@@ -65,8 +67,11 @@ class SimileTimeline(object):
         else:
             return False
 
+
+    # Accessor methods for mainTimelineScale
     def getMainTimelineScale(self):
         return self.mainTimelineScale
+
 
     # Accessor methods for overviewTimelineScale
     def setOverviewTimelineScale(self, scale):
@@ -76,6 +81,8 @@ class SimileTimeline(object):
         else:
             return False
 
+
+    # Accessor methods for overviewTimelineScale
     def getOverviewTimelineScale(self):
         return self.overviewTimelineScale
 
@@ -105,6 +112,7 @@ class SimileTimeline(object):
         self.sources.append(source)
         return True
 
+
     # The dates entered here must either be of type date or datetime
     def addEvent(self, title=None, desc=None, start=None, end=None):
         if title == None:
@@ -127,6 +135,8 @@ class SimileTimeline(object):
         self.events.append(event)
         return True
 
+
+    # This function generates data structures that will eventually be fed to the timeline
     def _generateData(self):
         data = {}
         data['dateTimeFormat'] = 'iso8601'
@@ -150,20 +160,21 @@ class SimileTimeline(object):
 
             for row in rows:
                 event = {}
+                
+                # Get titles and descriptions
+                event['title'] = self._getStringRepresentation(table, row, title)
+                if event['title'] == None:
+                    continue
 
+                if desc != None:
+                    event['description'] = self._getStringRepresentation(table, row, desc)
+                    if event['description'] == None:
+                        continue
+                    
                 # When doing these row accesses, we make sure they actually exist
                 # and catch any exceptions, skipping that entry
                 try:
-                    event['title'] = self._getStringRepresentation(table, row, title)
-                    if event['title'] == None:
-                        continue
-
                     event['start'] = self._formatTime(row[start])
-
-                    if desc != None:
-                        event['description'] = self._getStringRepresentation(table, row, desc)
-                        if event['description'] == None:
-                            continue
 
                     if end != None:
                         event['end'] = self._formatTime(row[end])
@@ -182,6 +193,7 @@ class SimileTimeline(object):
 
         return data
 
+
     # Attempts to use the represent lambda attribute to transform an otherwise
     # incoherent piece of data
     def _getStringRepresentation(self, table, row, attr):
@@ -199,8 +211,10 @@ class SimileTimeline(object):
                 return str(repLambda(row[attr]))
             else:
                 return row[attr]
-        except KeyError:  # Does this catch all of the possible exceptions?
+        except KeyError as detail:  # Does this catch all of the possible exceptions?
+            self._log("Caught error: %s\n Skipping..." % detail)
             return None
+
 
     # Maybe this needs to be updated to allow parsing text in case the user wishes
     # to add times as a string
@@ -213,14 +227,18 @@ class SimileTimeline(object):
             self._log("Unable to convert from type %s" % type(obj))
             return None
 
+
     def _data_to_xml(self):
         return self._generateData().xml()
+
 
     def _data_to_json(self):
        return json.dumps(self._generateData())
 
-    # Can we dynamically determine the scaling based on event proximity?
-    # We should also use gluon's HTML generation helpers where we can here
+
+    # This method is called by the user.  It returns the HTML and Javascript needed
+    # to display the timeline.  It also places a reference to the Timeline Javascript
+    # in the HEAD so that the Timeline will load correctly.
     def generateCode(self):
         body = []
         code = ""

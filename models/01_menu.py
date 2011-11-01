@@ -795,6 +795,7 @@ s3_menu_dict = {
                                            args="create")],
                     [T("List All"), False, aURL(c="inv", f="send")],
                 ]],
+                [T("Shipment Timeline"), False, aURL(c="inv", f="inv_timeline"), []],
                 [T("Items"), False, aURL(c="supply", f="item"), [
                     [T("New"), False, aURL(p="create", c="supply",
                                            f="item",
@@ -1008,6 +1009,7 @@ s3_menu_dict = {
                 [T("Commitments"), False, aURL(c="req", f="commit"), [
                     [T("List All"), False, aURL(c="req", f="commit")]
                 ]],
+                [T("Timeline"), False, aURL(c="req", f="req_timeline"), []]
             ]
     },
 
