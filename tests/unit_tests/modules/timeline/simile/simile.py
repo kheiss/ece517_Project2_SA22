@@ -30,6 +30,8 @@ class SimileTimelineTest(unittest.TestCase):
         # verify that the sources and events lists are initially empty
         self.assertTrue( len(self.timeLineDataProvider.sources) == 0 ) 
         self.assertTrue( len(self.timeLineDataProvider.events) == 0 ) 
+        self.assertEquals('WEEK', self.timeLineDataProvider.mainTimelineScale)
+        self.assertEquals('MONTH', self.timeLineDataProvider.overviewTimelineScale)
         
 
     @unittest.expectedFailure # remove for production
@@ -99,11 +101,11 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertTrue( len(self.timeLineDataProvider.events) == 1 )
         # verify that the event contains the info that were passed in
         self.event =  self.timeLineDataProvider.events[0]
-        self.assertEqual(self.event['title'], self.title)
-        self.assertEqual(self.event['description'], self.description)
-        self.assertFalse(self.event['durationEvent'])
-        self.assertEqual(self.event['start'], self.timeLineDataProvider._formatTime(self.start))
-        self.assertFalse(self.event.has_key('end'))
+        self.assertEqual(self.event.title, self.title)
+        self.assertEqual(self.event.description, self.description)
+        self.assertFalse(self.event.durationEvent)
+        self.assertEqual(self.event.start, self.start)
+        self.assertEqual(self.event.end, self.end)
 
         # event with start and end as datetimes
         self.title = 'Event 2' # required
@@ -117,11 +119,11 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertTrue( len(self.timeLineDataProvider.events) == 2 )
         # verify that the event contains the info that were passed in
         self.event =  self.timeLineDataProvider.events[1]
-        self.assertEqual(self.event['title'], self.title)
-        self.assertEqual(self.event['description'], self.description)
-        self.assertTrue(self.event['durationEvent'])
-        self.assertEqual(self.event['start'], self.timeLineDataProvider._formatTime(self.start))
-        self.assertEqual(self.event['end'], self.timeLineDataProvider._formatTime(self.end))
+        self.assertEqual(self.event.title, self.title)
+        self.assertEqual(self.event.description, self.description)
+        self.assertTrue(self.event.durationEvent)
+        self.assertEqual(self.event.start, self.start)
+        self.assertEqual(self.event.end, self.end)
 
         # event with start and end as dates
         self.title = 'Event 3' # required
@@ -135,11 +137,11 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertTrue( len(self.timeLineDataProvider.events) == 3 )
         # verify that the event contains the info that were passed in
         self.event =  self.timeLineDataProvider.events[2]
-        self.assertEqual(self.event['title'], self.title)
-        self.assertEqual(self.event['description'], self.description)
-        self.assertTrue(self.event['durationEvent'])
-        self.assertEqual(self.event['start'], self.timeLineDataProvider._formatTime(self.start))
-        self.assertEqual(self.event['end'], self.timeLineDataProvider._formatTime(self.end))
+        self.assertEqual(self.event.title, self.title)
+        self.assertEqual(self.event.description, self.description)
+        self.assertTrue(self.event.durationEvent)
+        self.assertEqual(self.event.start, self.start)
+        self.assertEqual(self.event.end, self.end)
 
 
     @unittest.expectedFailure # remove for production
@@ -269,11 +271,11 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertTrue( len(self.timeLineDataProvider.sources) == 1 )
         # verify that the event contains the info that were passed in
         self.source =  self.timeLineDataProvider.sources[0]
-        self.assertEqual(self.source['table'], self.table)
-        self.assertEqual(self.source['title'], self.title)
-        self.assertEqual(self.source['desc'], self.description)
-        self.assertEqual(self.source['start'], self.start)
-        self.assertEqual(self.source['end'], self.end)
+        self.assertEqual(self.source.table, self.table)
+        self.assertEqual(self.source.title, self.title)
+        self.assertEqual(self.source.description, self.description)
+        self.assertEqual(self.source.start, self.start)
+        self.assertEqual(self.source.end, self.end)
 
         # We use the irs_icategory table of the Eden database as a source of events.
         # The irs_icategory table contains the following fields:
@@ -291,11 +293,11 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertTrue( len(self.timeLineDataProvider.sources) == 2 )
         # verify that the event contains the info that were passed in
         self.source =  self.timeLineDataProvider.sources[1]
-        self.assertEqual(self.source['table'], self.table)
-        self.assertEqual(self.source['title'], self.title)
-        self.assertEqual(self.source['desc'], self.description)
-        self.assertEqual(self.source['start'], self.start)
-        self.assertEqual(self.source['end'], self.end)
+        self.assertEqual(self.source.table, self.table)
+        self.assertEqual(self.source.title, self.title)
+        self.assertEqual(self.source.description, self.description)
+        self.assertEqual(self.source.start, self.start)
+        self.assertEqual(self.source.end, self.end)
         
         
     def testGenerateData(self):
