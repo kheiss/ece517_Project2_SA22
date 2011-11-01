@@ -1,12 +1,88 @@
-import logging
 import json
 import xml
-
 from datetime import datetime, date, time
-
 from gluon import *
 
-class SimileTimeline(object):
+from timeline.base import Timeline
+from timeline.event import *
+
+class SimileEvent(Event):
+    def __init__(self, **kwargs):
+        super(SimileEvent, self).__init__(**kwargs)
+
+        self.description = kwargs.get('desc', None)
+        self.end = kwargs.get('end', None)
+
+        if self.end != None:
+            self.durationEvent = True
+        else:
+            self.durationEvent = False
+
+
+
+class SimileEventSource(EventSource):
+    def __init__(self, **kwargs):
+        super(SimileEventSource, self).__init__(**kwargs)
+
+        self.description = kwargs.get('desc', None)
+        self.end = kwargs.get('end', None)
+
+
+    # This function is used internally to format date and datetime objects to something
+    # we can pass to the timeline
+    def _formatTime(self, obj):
+        if type(obj) is datetime:
+            return obj.isoformat('T')
+        elif type(obj) is date:
+            return datetime.combine(obj, time()).isoformat('T')
+        else:
+            return None
+
+
+    def getEvents(self):
+        events = []
+
+        # Get our table entries and filter them if needed
+        db = self.table._db
+        rows = db(self.table).select()
+        if self.filter != None and callable(self.filter):
+            rows = rows.find(self.filter) 
+
+        for row in rows:
+            event = {}
+            
+            # Get titles and descriptions
+            title = self.getStringRepresentation(self.table, row, self.title)
+            if title == None:
+                continue
+
+            if self.description != None:
+                description = self.getStringRepresentation(self.table, row, self.description)
+                if description == None:
+                    continue
+            else:
+                description = None
+                
+            # When doing these row accesses, we make sure they actually exist
+            # and catch any exceptions, skipping that entry
+            try:
+                start = self._formatTime(row[self.start])
+
+                if self.end != None:
+                    end = self._formatTime(row[self.end])
+                else:
+                    end = None
+            except KeyError:
+                continue
+
+            event = SimileEvent(title=title, desc=description, start=start, end=end)
+            events.append(event)
+
+        return events
+
+
+
+class SimileTimeline(Timeline):
     """Timeline using Simile Widgets implementation"""
 
     # An example of running this might be:
@@ -18,14 +94,7 @@ class SimileTimeline(object):
     # timeline = tl.generateCode()
     # return dict(timeline=timeline)
 
-    # Notes:
-    #
-    # The addEventSource() and addEvent() methods could probably be moved into their
-    # own class for generating and checking events.  This would allow this class to be reusable
-    # across different timeline implementations potentially.
-
     # This is the path to the timeline javascript library
-    # Should this be local instead?
     _SRC_URL = 'http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true'
 
     # This maps the default timeline intervals
@@ -54,11 +123,6 @@ class SimileTimeline(object):
         self.overviewTimelineScale = 'MONTH'
 
     
-    # Need to define this to actually log to web2py
-    def _log(self, msg):
-        print msg
-
-
     # Accessor methods for mainTimelineScale
     def setMainTimelineScale(self, scale):
         if scale in self._INTERVAL_MAP:
@@ -91,47 +155,14 @@ class SimileTimeline(object):
     # uses to query the database. This information is then used to convert the database
     # query into data that the timeline can read.
     def addEventSource(self, table=None, filter=None, title=None, desc=None, start=None, end=None):
-        if table == None:
-            self._log("A database table must be provided!")
-            return False
-        if title == None:
-            self._log("A title mapping must be provided!")
-            return False
-        if start == None:
-            self._log("A start mapping must be provided!")
-            return False
-
-        # We could probably put this in a new class called EventSource
-        source = {}
-        source['table'] = table
-        source['filter'] = filter
-        source['title'] = title
-        source['desc'] = desc
-        source['start'] = start
-        source['end'] = end
+        source = SimileEventSource(table=table, filter=filter, title=title, desc=desc, start=start, end=end)
         self.sources.append(source)
         return True
 
 
     # The dates entered here must either be of type date or datetime
     def addEvent(self, title=None, desc=None, start=None, end=None):
-        if title == None:
-            self._log("A title must be provided!")
-            return False
-        elif start == None:
-            self._log("A start date must be provided!")
-            return False
-
-        event = {}
-        event['title'] = title
-        event['description'] = desc
-        event['start'] = self._formatTime(start)
-        if end != None:
-            event['end'] = self._formatTime(end)
-            event['durationEvent'] = True
-        else:
-            event['durationEvent'] = False
-
+        event = SimileEvent(title=title, desc=desc, start=start, end=end)
         self.events.append(event)
         return True
 
@@ -144,105 +175,20 @@ class SimileTimeline(object):
 
         # Add the data provided by the event sources
         for source in self.sources:
-            # Define these for convenience
-            table = source['table']
-            filter = source['filter']
-            title = source['title']
-            desc = source['desc']
-            start = source['start']
-            end = source['end']
-
-            # Get our table entries and filter them if needed
-            db = table._db
-            rows = db(table).select()
-            if filter != None and callable(filter):
-                rows = rows.find(filter) 
-
-            for row in rows:
-                event = {}
-                
-                # Get titles and descriptions
-                event['title'] = self._getStringRepresentation(table, row, title)
-                if event['title'] == None:
-                    continue
-
-                if desc != None:
-                    event['description'] = self._getStringRepresentation(table, row, desc)
-                    if event['description'] == None:
-                        continue
-                    
-                # When doing these row accesses, we make sure they actually exist
-                # and catch any exceptions, skipping that entry
-                try:
-                    event['start'] = self._formatTime(row[start])
-
-                    if end != None:
-                        event['end'] = self._formatTime(row[end])
-                        event['durationEvent'] = True
-                    else:
-                        event['durationEvent'] = False
-                except KeyError as detail:
-                    self._log("Caught error: %s\n Skipping..." % detail)
-                    continue
-
-                data['events'].append(event)
+            for event in source.getEvents():
+                data['events'].append(event.__dict__)
 
         # Add the static event data
         for event in self.events:
-            data['events'].append(event)
+            data['events'].append(event.__dict__)
 
         return data
 
 
-    # Attempts to use the represent lambda attribute to transform an otherwise
-    # incoherent piece of data
-    # Also has the ability to interpret lambda functions and use them to generate a 
-    # string.
-    def _getStringRepresentation(self, table, row, attr):
-        # We do a lot of accesses with potential exceptions here, so lets just
-        # wrap the whole thing in a try block
-        try:
-            # Check to see if the mapping is a lambda. If so, lets use it to get
-            # the string
-            if attr != None and callable(attr):
-                return attr(row)
-            
-            # Simple sanity check for empty values
-            if table == None or row[attr] == None:
-                return row[attr]
-
-            # Check to see if we got a represent lambda and run it, otherwise return the 
-            # string value of the Field
-            repLambda = eval("table.%s.represent" % attr)
-            if repLambda != None and callable(repLambda):
-                return str(repLambda(row[attr]))
-            else:
-                return row[attr]
-        except KeyError as detail:  # Does this catch all of the possible exceptions?
-            self._log("Caught error: %s\n Skipping..." % detail)
-            return None
-
-
-    # Maybe this needs to be updated to allow parsing text in case the user wishes
-    # to add times as a string
-    def _formatTime(self, obj):
-        if type(obj) is datetime:
-            return obj.isoformat('T')
-        elif type(obj) is date:
-            return datetime.combine(obj, time()).isoformat('T')
-        else:
-            self._log("Unable to convert from type %s" % type(obj))
-            return None
-
-
-    def _data_to_xml(self):
-        return self._generateData().xml()
-
-
     def _data_to_json(self):
-       return json.dumps(self._generateData())
+        return json.dumps(self._generateData())
 
-
+    
     # This method is called by the user.  It returns the HTML and Javascript needed
     # to display the timeline.  It also places a reference to the Timeline Javascript
     # in the HEAD so that the Timeline will load correctly.
@@ -251,7 +197,6 @@ class SimileTimeline(object):
         code = ""
 
         # Generate the timeline javascript
-        # We should probably have a way for the user to specify the time intervalUnit
         body.append(SCRIPT('''
             var tl;
             function onLoad() {
