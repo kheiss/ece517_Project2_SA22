@@ -155,7 +155,7 @@ class SimileTimeline(object):
             # Get our table entries and filter them if needed
             db = table._db
             rows = db(table).select()
-            if filter != None and isinstance(filter, type(lambda: None)):
+            if filter != None and callable(filter):
                 rows = rows.find(filter) 
 
             for row in rows:
@@ -196,10 +196,17 @@ class SimileTimeline(object):
 
     # Attempts to use the represent lambda attribute to transform an otherwise
     # incoherent piece of data
+    # Also has the ability to interpret lambda functions and use them to generate a 
+    # string.
     def _getStringRepresentation(self, table, row, attr):
         # We do a lot of accesses with potential exceptions here, so lets just
         # wrap the whole thing in a try block
         try:
+            # Check to see if the mapping is a lambda. If so, lets use it to get
+            # the string
+            if attr != None and callable(attr):
+                return attr(row)
+            
             # Simple sanity check for empty values
             if table == None or row[attr] == None:
                 return row[attr]
@@ -207,7 +214,7 @@ class SimileTimeline(object):
             # Check to see if we got a represent lambda and run it, otherwise return the 
             # string value of the Field
             repLambda = eval("table.%s.represent" % attr)
-            if repLambda != None and isinstance(repLambda, type(lambda: None)):
+            if repLambda != None and callable(repLambda):
                 return str(repLambda(row[attr]))
             else:
                 return row[attr]

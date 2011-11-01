@@ -568,8 +568,10 @@ def commit_item_json():
 
 # =============================================================================
 def req_timeline():
+    req_desc = lambda x: "Comments: %s\n" % (x.comments)
+    
     tl = simileTimeline.SimileTimeline()
-    tl.addEventSource(table=db.req_req, title='event_id.name', start='date_required', end='date_required_until')
+    tl.addEventSource(table=db.req_req, title='event_id.name', desc=req_desc, start='date_required', end='date_required_until')
     timeline = tl.generateCode()
     return dict(timeline=timeline)
 
