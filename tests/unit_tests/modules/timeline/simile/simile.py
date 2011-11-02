@@ -15,12 +15,29 @@ import datetime
 
 import applications.eden.modules.timeline.simile as simile
 
+#testDb = DAL('sqlite://simileTimelineTest.db')
+#from gluon.globals import Request
+## Rename the test database so that functions will use it instead of the real database
+#db = testDb  
+
+# create a new test db with fake data
+#testDb = DAL('sqlite://simileTimelineTest.db')
+#testDb.define_table('timeline', Field('title'), Field('description'), Field('start','datetime'), Field('end','datetime'))
+#testDb(testDb.timeline).delete()
+#from gluon.contrib.populate import populate
+#populate(testDb.timeline,10)
+#testDb.commit()
+
+#print "CONTENTS -------"
+#print testDb.tables
+#print testDb(testDb.timeline).select()
+
 class SimileTimelineTest(unittest.TestCase):
 
 
     def setUp(self):
         self.timeLineDataProvider = simile.SimileTimeline()        
-
+        
 
     def tearDown(self):
         self.timeLineDataProvider = None
@@ -34,7 +51,6 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertEquals('MONTH', self.timeLineDataProvider.overviewTimelineScale)
         
 
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEvent() is called with null title
     # and/or null start
     def testAddEventNoParameters(self):
@@ -45,7 +61,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEvent()
         
     
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEvent() is called with null title
     # and/or null start
     def testAddEventNoTitleNoStart(self):
@@ -59,7 +74,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEvent(self.title, self.description, self.start, self.end)
 
     
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEvent() is called with null title
     # and/or null start
     def testAddEventNoTitle(self):
@@ -73,7 +87,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEvent(self.title, self.description, self.start, self.end)
 
     
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEvent() is called with null title
     # and/or null start
     def testAddEventNoStart(self):
@@ -154,7 +167,15 @@ class SimileTimelineTest(unittest.TestCase):
         
         with self.assertRaises(ValueError):
             self.timeLineDataProvider.addEvent(self.title, self.description, self.start, self.end)
-            
+
+    # verify that no error is reaised if start == end       
+    def testAddEventEndEqualsStart(self):
+        self.title = 'My Title' # required
+        self.description = "Just for fun" # optional
+        self.start = datetime.datetime.now() # required
+        self.end = self.start # optional
+        
+        self.timeLineDataProvider.addEvent(self.title, self.description, self.start, self.end)
 
     @unittest.expectedFailure # remove for production
     # verify that a TypeError is raised because start is neither a date nor a datetime
@@ -180,7 +201,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEvent(self.title, self.description, self.start, self.end)
 
 
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEventSource() is called with null table
     # and/or null title and/or null start 
     def testAddEventSourceNoParameters(self):
@@ -191,7 +211,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEventSource()
 
 
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEventSource() is called with null table
     # and null title and null start
     def testAddEventSourceNoTableNoTitleNoStart(self):
@@ -206,7 +225,7 @@ class SimileTimelineTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.timeLineDataProvider.addEventSource(self.table, self.filter, self.title, self.description, self.start, self.end)
 
-    @unittest.expectedFailure # remove for production
+
     # should raise a TypeError when addEventSource() is called with null table
     def testAddEventSourceNoTable(self):
         
@@ -221,7 +240,6 @@ class SimileTimelineTest(unittest.TestCase):
             self.timeLineDataProvider.addEventSource(self.table, self.filter, self.title, self.description, self.start, self.end)
 
     
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEventSource() is called with null title
     def testAddEventSourceNoTitle(self):
         
@@ -234,9 +252,8 @@ class SimileTimelineTest(unittest.TestCase):
         
         with self.assertRaises(TypeError):
             self.timeLineDataProvider.addEventSource(self.table, self.filter, self.title, self.description, self.start, self.end)
-
+            
     
-    @unittest.expectedFailure # remove for production
     # should raise a TypeError when addEventSource() is called with null start
     def testAddEventSourceNoStart(self):
         
