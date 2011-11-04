@@ -3,10 +3,13 @@ Created on Oct 29, 2011
 
 To run this test case execute the following command from within the web2py directory:
 
-
 python web2py.py -N -M -S eden -R applications/eden/tests/unit_tests/modules/timeline/simile/simile.py
-The db variable used in this test case is initialized by web2py.
-It's a connection to the Eden database. 
+
+If you see a test case marked with @unittest.expectedFailure it means that 
+we know there's a bug in the source code that makes this test fail,
+ but we temporarily absorb this failure until the bug is fixed.
+Once the source code is fixed, the @unittest.expectedFailure mark should be removed
+and, if the fix is good, the test should pass.
 
 @author:
 '''
@@ -311,13 +314,16 @@ class SimileTimelineTest(unittest.TestCase):
         self.assertEqual(self.source.start, self.start)
         self.assertEqual(self.source.end, self.end)
         
-        
+    @unittest.expectedFailure # remove for production        
     def testGenerateData(self):
         # verify what data are returned when no events have been added
         data = self.timeLineDataProvider._generateData()
         self.assertEquals({'dateTimeFormat': 'iso8601', 'events': []}, data)
 
         # We use the timeline table of the test database as a source of events.
+        # Notice that the timeline contains some record where start > end.
+        # Those record should be ignored by the generateData() 
+        # and should not be in the generated list of events to display
         self.table = self.testDb.timeline
         self.filter = None # optional
         self.title = "title" # required
@@ -327,12 +333,47 @@ class SimileTimelineTest(unittest.TestCase):
         
         self.timeLineDataProvider.addEventSource(self.table, self.filter, self.title, self.description, self.start, self.end)
         data = self.timeLineDataProvider._generateData()
-        expected = {'dateTimeFormat': 'iso8601', 'events': [{'start': '2008-03-05T00:00:00', 'durationEvent': True, 'end': '2008-04-27T00:00:00', 'description': 'It--a natural reflex actions which formerly had the quality of it. ', 'title': '74 diagram and we will dispute the outline we see a. '}, {'start': '2008-09-21T00:00:00', 'durationEvent': True, 'end': '2008-08-08T00:00:00', 'description': 'Sport for nowhere do not seen an animal play an infinite. ', 'title': 'Insectivorous bats. Girdled about the brain. But we have. '}, {'start': '2008-02-06T00:00:00', 'durationEvent': True, 'end': '2008-09-23T00:00:00', 'description': 'Celandine with or pass through the tse-tse fly spreads out some. ', 'title': 'Marks most important acquisitions of working powerfully along with a smack. '}, {'start': '2008-10-09T00:00:00', 'durationEvent': True, 'end': '2008-10-07T00:00:00', 'description': 'Healthfulness and muscle-cells which just mentioned indicates a plaice and bettered. ', 'title': 'Mostly in this is blown back and the mind at least. '}, {'start': '2008-07-30T00:00:00', 'durationEvent': True, 'end': '2008-06-17T00:00:00', 'description': 'Everyone who found to the monitors are often it had no. ', 'title': 'Transmissible. given the ascent of rose on from roots of detecting. '}, {'start': '2008-02-08T00:00:00', 'durationEvent': True, 'end': '2008-02-16T00:00:00', 'description': 'Stars--or rather with the other medium of backboned animals have found. ', 'title': 'Cocoon flies to create fresh invention of the united states copyright. '}, {'start': '2008-08-14T00:00:00', 'durationEvent': True, 'end': '2008-09-08T00:00:00', 'description': 'Flower-vase well says do not have we saw combine to sneak. ', 'title': 'Twenty-five million million years ago they are in the end were. '}, {'start': '2008-01-04T00:00:00', 'durationEvent': True, 'end': '2008-08-10T00:00:00', 'description': 'Persecuted. Mcgregor from its axis in the okapi and easy. ', 'title': 'Crowning advantage over 800 trillion miles. That 93 000 000. '}, {'start': '2008-05-05T00:00:00', 'durationEvent': True, 'end': '2008-09-13T00:00:00', 'description': 'Apace there is snow. It may be small number develop. ', 'title': 'Solution.... It can be discovered in process of the floor. '}, {'start': '2008-05-11T00:00:00', 'durationEvent': True, 'end': '2008-01-30T00:00:00', 'description': 'Attracted one in the number of many times we know and. ', 'title': 'Elevation of radium. the expression of energy which indicate a skeleton. '}]}
-        self.assertEqual(data, expected)
+        # this is wrong output because events with start > end have been accepted as valid and added to the list of events to be displayed
+        wrong = {'dateTimeFormat': 'iso8601', 'events': [{'start': '2008-03-05T00:00:00', 'durationEvent': True, 'end': '2008-04-27T00:00:00', 'description': 'It--a natural reflex actions which formerly had the quality of it. ', 'title': '74 diagram and we will dispute the outline we see a. '}, {'start': '2008-09-21T00:00:00', 'durationEvent': True, 'end': '2008-08-08T00:00:00', 'description': 'Sport for nowhere do not seen an animal play an infinite. ', 'title': 'Insectivorous bats. Girdled about the brain. But we have. '}, {'start': '2008-02-06T00:00:00', 'durationEvent': True, 'end': '2008-09-23T00:00:00', 'description': 'Celandine with or pass through the tse-tse fly spreads out some. ', 'title': 'Marks most important acquisitions of working powerfully along with a smack. '}, {'start': '2008-10-09T00:00:00', 'durationEvent': True, 'end': '2008-10-07T00:00:00', 'description': 'Healthfulness and muscle-cells which just mentioned indicates a plaice and bettered. ', 'title': 'Mostly in this is blown back and the mind at least. '}, {'start': '2008-07-30T00:00:00', 'durationEvent': True, 'end': '2008-06-17T00:00:00', 'description': 'Everyone who found to the monitors are often it had no. ', 'title': 'Transmissible. given the ascent of rose on from roots of detecting. '}, {'start': '2008-02-08T00:00:00', 'durationEvent': True, 'end': '2008-02-16T00:00:00', 'description': 'Stars--or rather with the other medium of backboned animals have found. ', 'title': 'Cocoon flies to create fresh invention of the united states copyright. '}, {'start': '2008-08-14T00:00:00', 'durationEvent': True, 'end': '2008-09-08T00:00:00', 'description': 'Flower-vase well says do not have we saw combine to sneak. ', 'title': 'Twenty-five million million years ago they are in the end were. '}, {'start': '2008-01-04T00:00:00', 'durationEvent': True, 'end': '2008-08-10T00:00:00', 'description': 'Persecuted. Mcgregor from its axis in the okapi and easy. ', 'title': 'Crowning advantage over 800 trillion miles. That 93 000 000. '}, {'start': '2008-05-05T00:00:00', 'durationEvent': True, 'end': '2008-09-13T00:00:00', 'description': 'Apace there is snow. It may be small number develop. ', 'title': 'Solution.... It can be discovered in process of the floor. '}, {'start': '2008-05-11T00:00:00', 'durationEvent': True, 'end': '2008-01-30T00:00:00', 'description': 'Attracted one in the number of many times we know and. ', 'title': 'Elevation of radium. the expression of energy which indicate a skeleton. '}]}
+        self.assertNotEqual(data, wrong)
+        # this is good output because events with start > end have been ignored and are not in the list of events to be displayed
+        good =  {'dateTimeFormat': 'iso8601', 'events': [{'start': '2008-03-05T00:00:00', 'durationEvent': True, 'end': '2008-04-27T00:00:00', 'description': 'It--a natural reflex actions which formerly had the quality of it. ', 'title': '74 diagram and we will dispute the outline we see a. '}, {'start': '2008-02-06T00:00:00', 'durationEvent': True, 'end': '2008-09-23T00:00:00', 'description': 'Celandine with or pass through the tse-tse fly spreads out some. ', 'title': 'Marks most important acquisitions of working powerfully along with a smack. '}, {'start': '2008-02-08T00:00:00', 'durationEvent': True, 'end': '2008-02-16T00:00:00', 'description': 'Stars--or rather with the other medium of backboned animals have found. ', 'title': 'Cocoon flies to create fresh invention of the united states copyright. '}, {'start': '2008-08-14T00:00:00', 'durationEvent': True, 'end': '2008-09-08T00:00:00', 'description': 'Flower-vase well says do not have we saw combine to sneak. ', 'title': 'Twenty-five million million years ago they are in the end were. '}, {'start': '2008-01-04T00:00:00', 'durationEvent': True, 'end': '2008-08-10T00:00:00', 'description': 'Persecuted. Mcgregor from its axis in the okapi and easy. ', 'title': 'Crowning advantage over 800 trillion miles. That 93 000 000. '}, {'start': '2008-05-05T00:00:00', 'durationEvent': True, 'end': '2008-09-13T00:00:00', 'description': 'Apace there is snow. It may be small number develop. ', 'title': 'Solution.... It can be discovered in process of the floor. '}]}
+        self.assertEqual(data, good)
 
 
     def testGenerateCode(self):
+        # The generated code contains the time the code was generated with subsecond precision.
+        # Because of this each call to generateCode() generates a different code. 
+        # Therefore it makes no sense in textually comparing the output of the 
+        # generateCode() method against the result of a previous call stored in a bench file. 
+        # Do not know how to programmatically easily verify that the generate code is correct.
         pass
+        
+#        self.code = self.timeLineDataProvider.generateCode()        
+#        self.benchedDefaultTimelineCodeFileName = "applications/eden/tests/unit_tests/modules/timeline/simile/DefaultTimelineCode.txt"
+        
+        # create the benched file to compare against
+#        self.file = open(self.benchedDefaultTimelineCodeFileName, 'w')
+#        self.file.write(self.code)
+#        self.file.close()        
+        
+        # Would compare the generated code with the contents of the benched file
+#        self.file = open(self.benchedDefaultTimelineCodeFileName, 'r') 
+#        self.assertEqual(self.code, self.file.read())
+        
+        # We use the timeline table of the test database as a source of events.
+        # Notice that the timeline contains some record where start > end.
+        # Those record should be ignored by the generateData() 
+        # and should not be in the generated list of events to display
+#        self.table = self.testDb.timeline
+#        self.filter = None # optional
+#        self.title = "title" # required
+#        self.description = 'description' # optional
+#        self.start = "start" # required
+#        self.end = "end" # optional
+#        
+#        self.timeLineDataProvider.addEventSource(self.table, self.filter, self.title, self.description, self.start, self.end)
+#        self.code = self.timeLineDataProvider.generateCode()
 
 # to make the command
 # python web2py.py -N -M -S eden -R applications/eden/tests/unit_tests/modules/timeline/simile/simile.py
