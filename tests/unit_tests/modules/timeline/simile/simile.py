@@ -344,9 +344,9 @@ class SimileTimelineTest(unittest.TestCase):
     def testGenerateCode(self):
         # The generated code contains the time the code was generated with subsecond precision.
         # Because of this each call to generateCode() generates a different code. 
-        # Therefore it makes no sense in textually comparing the output of the 
-        # generateCode() method against the result of a previous call stored in a bench file. 
-        # Do not know how to programmatically easily verify that the generate code is correct.
+        # Therefore it makes no sense to textually compare the output of the 
+        # generateCode() against the result of a previous call. 
+        # At the moment I do not know how to verify via a unit test that the generated code is correct.
         pass
         
 #        self.code = self.timeLineDataProvider.generateCode()        
