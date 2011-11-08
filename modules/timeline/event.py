@@ -18,10 +18,15 @@ class EventSource(object):
         self.start = start
 
 
-    # Attempts to use the represent lambda attribute to transform an otherwise
-    # incoherent piece of data
-    # Also has the ability to interpret lambda functions and use them to generate a 
-    # string.
+    # This is a helper function that is designed to get the string equvalent of a field
+    # to be used in the timeline.  The primary reason for this is because it is often
+    # the case that the data stored in the db table has a string representation differing
+    # from that of what is humanly readable.  In these cases, when the table is created
+    # a 'represent' attribute can be specified which is typically a lambda function for
+    # transforming the field into a humanly readable format.  This method also has the 
+    # ability to apply a user generated lambda to the field instead.  In the event that
+    # a user lambda nor represent attribute exists, the pure string representation of 
+    # the field is returned.
     def getStringRepresentation(self, table, row, attr):
         # We do a lot of accesses with potential exceptions here, so lets just
         # wrap the whole thing in a try block
